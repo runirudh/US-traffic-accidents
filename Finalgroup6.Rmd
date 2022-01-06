@@ -1,0 +1,347 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+```{r, warning=False, message=False}
+library(ggplot2)
+library(GGally)
+require(nnet)
+library(randomForest)
+library(lubridate)
+require(MASS)
+library(forcats)
+library(pscl)
+library(gridExtra)
+library(ROCR)
+
+# loading data agn n clean up.
+US_Accidents <- read.csv("~/Downloads/Accidents Data CSV.csv",stringsAsFactors=FALSE, header=T)
+# Merge severity into two factors
+US_Accidents$Severity <- factor(US_Accidents$Severity)
+US_Accidents$Severity <- fct_collapse(US_Accidents$Severity, Low = c("1","2"), High = c("3","4"))
+#Convert side to factor and remove empty
+US_Accidents$Side <- factor(US_Accidents$Side)
+levels(US_Accidents$Side)[1] <- NA
+levels(US_Accidents$Side) <- c("Left", "Right")
+US_Accidents$Amenity <- factor(US_Accidents$Amenity)
+US_Accidents$Bump <- factor(US_Accidents$Bump)
+US_Accidents$Crossing <- factor(US_Accidents$Crossing)
+US_Accidents$Give_Way <- factor(US_Accidents$Give_Way)
+US_Accidents$Junction <- factor(US_Accidents$Junction)
+US_Accidents$No_Exit <- factor(US_Accidents$No_Exit)
+US_Accidents$Railway <- factor(US_Accidents$Railway)
+US_Accidents$Roundabout <- factor(US_Accidents$Roundabout)
+US_Accidents$Station <- factor(US_Accidents$Station)
+US_Accidents$Stop <- factor(US_Accidents$Stop)
+US_Accidents$Traffic_Calming <- factor(US_Accidents$Traffic_Calming)
+US_Accidents$Traffic_Signal <- factor(US_Accidents$Traffic_Signal)
+US_Accidents$State <- factor(US_Accidents$State)
+US_Accidents$Time.Interval <- factor(US_Accidents$Time.Interval)
+US_Accidents$Timezone <- factor(US_Accidents$Timezone)
+levels(US_Accidents$Timezone)[1] <- NA
+# Convert ZipCode to 10 level factor
+US_Accidents <- US_Accidents[!is.na(US_Accidents$Zipcode), ] # Remove rows without zipcode
+US_Accidents$ZipcodeLevels[nchar(US_Accidents$Zipcode)==4] <-  0 # Convert all 4 digits zipcode to level 0
+US_Accidents$ZipcodeLevels <- substr(US_Accidents$Zipcode, 1, 1) 
+US_Accidents$ZipcodeLevels <- factor(US_Accidents$ZipcodeLevels) 
+levels(US_Accidents$ZipcodeLevels)[1] <- NA # Convert empty zipcodelevel to NA
+US_Accidents <- US_Accidents[!is.na(US_Accidents$ZipcodeLevels), ] # Remove rows with empty zipcodelevels
+# Trim the characters after 5 digits -> if not will cause NA issues
+US_Accidents$Zipcode <- substr(US_Accidents$Zipcode, 1, 5) 
+US_Accidents$Zipcode <- as.numeric(US_Accidents$Zipcode) 
+#Time difference between start and end time
+US_Accidents$Start_Time <- mdy_hm(US_Accidents$Start_Time)
+US_Accidents$End_Time <-  mdy_hm(US_Accidents$End_Time)
+US_Accidents$timediff.min <- as.numeric(with(US_Accidents, difftime(End_Time,Start_Time,units="mins")))
+#sapply(US_Accidents, function(x) sum(is.na(x)))
+US_Accidents = US_Accidents[-c(10,11)]
+US_Accidents <- na.omit(US_Accidents)
+str(US_Accidents)
+#names(US_Accidents)
+```
+
+```{r}
+summary(US_Accidents)
+```
+
+```{r, message=FALSE, warning=FALSE}
+#Zip has too many values
+ggpairs(US_Accidents, 
+        mapping = aes(color = Side),
+        columns = c("Side", "ZipcodeLevels", "Timezone", "Time.Interval","Temperature.F.","Wind_Chill.F.","Wind_Speed.mph.","Humidity...",
+                    "Pressure.in.","Visibility.mi.", "timediff.min", "Severity"))
+#Column 'State' has more levels (49) than the threshold (15) allowed, so not added.
+```
+wind chill & temp correlated. 
+```{r}
+# Too many features. Takes too long to run
+#g1 <- glm(Severity ~ .,family=binomial(link='logit'), data = US_Accidents)
+#summary(g1)
+#step(g1)
+
+
+g2 <- glm(Severity ~ Pressure.in. + Wind_Chill.F. + State + Side + Humidity... + Temperature.F. + Wind_Speed.mph. + Time.Interval + Timezone + Zipcode + Visibility.mi. ,family=binomial(link='logit'), data = US_Accidents)
+
+summary(g2)
+
+```
+State level 0 = Alabama.
+Coefs are interpreted as state changes from alabama, p of Accident severity increasing by coef value
+
+```{r}
+#plot(g2)
+```
+
+
+```{r}
+g2.step <- step(g2)
+pR2(g2.step)
+anova(g2.step)
+```
+
+
+```{r}
+car::compareCoefs(g2, g2.step, se = FALSE)
+anova(g2,g2.step, test = "Chisq")
+# g2 step better than g2 
+pR2(g2)
+summary(g2.step)
+```
+
+looking at summary of data and fixing a few values in the dataset. 
+```{r}
+#summary(US_Accidents)
+US_Accidents$timediff.min <- ifelse(US_Accidents$timediff.min > 3000, 3000, US_Accidents$timediff.min) # 50 hours 
+summary(US_Accidents)
+# looking at side we see about 80 % accidents occur when you are driving on the correct side of the road (right)
+# 44451/55503
+#(11052/55503)*100  
+```
+
+Now we fit a different model w/ zipcodelevels factor variable, to investigate how severe accidents vary in different parts of the country.
+
+Wind_Chill and temperature are correlated, so dropping Temperature off, as stepwise in previous model took it out as well. Removing humidity as well as it got removed in the first iteration of stepwise regression on above big model.
+```{r}
+g4 <- glm(Severity ~ Time.Interval+ timediff.min+ Timezone + ZipcodeLevels + Side + Visibility.mi. 
+          + Humidity... + Wind_Chill.F.,family=binomial(link='logit'), data = US_Accidents)
+summary(g4)
+
+# we see that total 4 dummy variables in Time interval and  Timezone aren't significant.  
+# humidity, windchill are also not significant
+g4step <- step(g4)
+summary(g4step) # same as last model , only takes out windchill
+anova(g4step,g4,test = "Chisq") # step is better. now we take out humidity ourselves to see if there's an improvement
+
+
+
+g4manual <- glm(Severity ~ Time.Interval+ timediff.min+ Timezone + ZipcodeLevels + Side + Visibility.mi.,family=binomial(link='logit'), data = US_Accidents)
+anova(g4manual,g4step, test = "Chisq") # not much difference in deviance.  
+
+pR2(g4step) # checkring Mcfadden r-sq value 
+# an increase from g2 model 
+```
+
+Trying out an interaction model , since many variables are factors
+```{r}
+g5 <- glm(Severity ~ Time.Interval + timediff.min + Side*ZipcodeLevels + Visibility.mi.
+          + Timezone ,family=binomial(link='logit'), data = US_Accidents)
+anova(g4step,g5, test = "Chisq") # big model w interaction term is better
+
+anova(g5,test = "Chisq") # deviance doesn't decrease by much by using visibility, timediff.min
+
+pR2(g5) # an improvemnt still
+summary(g5) 
+# running step, doesn't take anything out
+g5step <- step(g5)
+nf <- layout( matrix(c(1,2), ncol=2) )
+plot(g5) # 2 big outliers 
+
+# manually taking out variables that don't reduce deviance alot and performing anova. 
+# using different model fits, interactions 
+
+```
+
+```{r}
+g5quad <-  glm(Severity ~ Time.Interval + I(timediff.min^2) + Side*ZipcodeLevels
+          + Timezone +Visibility.mi. ,family=binomial(link='logit'), data = US_Accidents)
+anova(g5,g5quad,test= "Chisq")
+# res deviance of quad model is larger, use linear term only 
+
+g5step <- step(g5) 
+# step doesn't take anything out here
+anova(g5, test = "Chisq") # taking out visibility and timediff.min
+
+
+g5small <- glm(Severity ~ Time.Interval + Timezone + Side*ZipcodeLevels
+           ,family=binomial(link='logit'), data = US_Accidents)
+summary(g5small)
+anova(g5small, g5, test = "Chisq")
+
+
+# Model g5 wins.
+
+```
+
+```{r}
+# model w/out Timezone as its coefs are not significant for Mountain, Pacific dummy variables for some cases. 
+
+summary(US_Accidents$Timezone)
+# we see that we don't have the same data for all values, which is why significance might be low for some
+
+g6 <- glm(Severity ~ Side + Time.Interval + Visibility.mi. + timediff.min*ZipcodeLevels,family=binomial(link='logit'), data = US_Accidents )
+#anova(g6, test="Chisq")
+
+anova(g6,g5,test = "Chisq")
+# change in deviance as we go from g6 to g5 is significant. model g5 is best via anova testing (Chi-sq). timezone is an imp. variable 
+
+```
+
+```{r}
+# trying out a few differnt interactions 
+g5new <- glm(Severity ~ Time.Interval + Side+ timediff.min*ZipcodeLevels + Visibility.mi.
+          + Timezone ,family=binomial(link='logit'), data = US_Accidents)
+anova(g5,g5new, test = "Chisq") # g5 has better deviance on same d.f
+
+g5n <- glm(Severity ~ Time.Interval*ZipcodeLevels + Side+ timediff.min + Visibility.mi.
+          + Timezone ,family=binomial(link='logit'), data = US_Accidents)
+anova(g5,g5n, test= "Chisq") # we get a better deviance here using g5n model
+summary(g5n) # here looking at the significance, std. errors of interaction coefs, 
+#  tells us that g5n is a bit unreliable. 
+
+pR2(g5n) # increases by little
+
+
+#  we continue to work on g5
+
+# cooks distance to see if we can remove outliers in our residuals out 
+
+weight <- abs(rstudent(g5)) < 3 & abs(cooks.distance(g5)) < 4/nrow(g5$model)
+g5.updated <- update(g5, weights=as.numeric(weight))
+summary(g5.updated) # we see that this updation takes out the significance we prev. had 
+plot(g5.updated) # plot looks even worse
+#plot(g5)
+
+# trying to remove these rows of outlier data and running model again, g5best. 
+US_Accidents[c("785366", "551526"),] # shows that time.diff being at max was the reason for erratic values.
+row.names.remove <- c("785366", "551526")
+US_Accidents <- US_Accidents[!(row.names(US_Accidents) %in% row.names.remove), ] #no. of obs. 55503 -> 55501
+g5best <- glm(Severity ~ Time.Interval + timediff.min + Side*ZipcodeLevels + Visibility.mi.
+          + Timezone ,family=binomial(link='logit'), data = US_Accidents)
+
+```
+
+comparing models g5 and g5best
+```{r}
+pR2(g5best) # r-sq increased
+pR2(g5)
+summary(g5best)
+anova(g5best) # looks good too
+
+car::compareCoefs(g5, g5best, se = FALSE)
+# we can see that model coefs do not change and we managed removed the outliers in our data. 
+# outliers tend to move our regression line, lets see the plots 
+```
+
+CROSS VALIDATING models 
+```{r}
+#cv.g2 <- DAAG::CVbinary(g2)
+#cv.g2.step <- DAAG::CVbinary(g2.step) #er: factor State has new levels WY, model sees level #Wyoming in test fold but not in train fold
+
+cv.g5 <- DAAG::CVbinary(g5)
+cv.g5best <- DAAG::CVbinary(g5best)
+
+# same accuracy here. choose less complex model.
+```
+
+```{r}
+nf <- layout( matrix(c(1,2), ncol=2) )
+plot(g5best)
+# we see some departure from normality. res v fitted regresses close to 0. 
+# leverage v std. res. shows that NOT all points w/ leverage are influential & introduce outliers.
+
+car::influencePlot(g5best)
+#car::residualPlot(g5best)
+
+# weight <- abs(rstudent(g5best)) < 3 & abs(cooks.distance(g5best)) < 4/nrow(g5best$model)
+# g5best.updated <- update(g5best, weights=as.numeric(weight))
+# summary(g5best.updated)
+# plot(g5best.updated) 
+
+
+```
+
+```{r}
+# predicting accuracy of the model 
+# data is already randomly sampled, sampling again, selecting 70-30 % train-test
+dt = sort(sample(nrow(US_Accidents), nrow(US_Accidents)*.7))
+train<-US_Accidents[dt,]
+test<-US_Accidents[-dt,]
+table(is.na(train))
+table(is.na(test))
+
+#str(test)
+g5train <-  glm(Severity ~ Time.Interval + Side + ZipcodeLevels
+          + Timezone + timediff.min + Visibility.mi.,family=binomial(link='logit'), data = train)
+
+fitted.results <- predict(g5train,newdata= subset(test,select=c(6,14,49,20,50,27)), type='response')
+fitted.results <- ifelse(fitted.results > 0.5, 1, 0)
+misClasificError <- mean(fitted.results != test$Severity, na.rm = T)
+print(paste('Accuracy',1-misClasificError))
+
+# accuracy is 71.5 %, an improvement from random odds i.e 0.5. 
+
+
+p <- predict(g5train, newdata=subset(test,select=c(6,14,49,20,50,27)), type="response")
+pr <- prediction(fitted.results, test$Severity)
+
+prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+plot(prf)
+auc <- performance(pr, measure = "auc")
+auc <- auc@y.values[[1]]
+auc # closer to 0.5 than 1. not good at all. 
+# our model does not hv very good predicting ability it seems. 
+
+```
+
+residuals correlation check
+```{r}
+library(car)
+durbinWatsonTest(g5best)
+# reject null. our residuals are autocorrelated. but the value isn't very big
+```
+```{r}
+final<- coef(g5best)
+exp(final)
+summary(g5best)
+
+```
+
+RESIDUAL v PREDICTORS plots
+```{r}
+nf <- layout( matrix(1:4, ncol=2) )
+plot(US_Accidents$Time.Interval,g5best$residuals)   # 2 & 3 have big residual outliers.  
+
+plot(US_Accidents$Side,g5best$residuals) 
+
+plot(US_Accidents$ZipcodeLevels,g5best$residuals) # residuals of zipcode 2 are large.
+
+plot(US_Accidents$Timezone,g5best$residuals)
+
+plot(US_Accidents$Visibility.mi.,g5best$residuals) # we see a few pts with leverage and 1 huge outlier at visibility=10
+
+
+plot(US_Accidents$timediff.min,g5best$residuals) 
+
+# we see some non constant variance in these plots, but since  
+# data is also skewed for these categories, this may be admissable.  
+
+
+
+```
+
+
+

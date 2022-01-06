@@ -1,0 +1,137 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r}
+library(ggplot2)
+library(GGally)
+require(nnet)
+library(randomForest)
+library(lubridate)
+require(MASS)
+library(forcats)
+library(pscl)
+library(gridExtra)
+library(ROCR)
+
+US_Accidents <- read.csv("~/Downloads/Accidents Data CSV.csv",
+                             stringsAsFactors=FALSE, header=T)
+```
+
+
+```{r}
+summary(US_Accidents)
+```
+
+making data the right type. converting to Na and removing Na. 
+new feature creature- ZipcodeLevels, timediffmin from existing features
+```{r}
+# Merge severity into two factors
+US_Accidents$Severity <- factor(US_Accidents$Severity)
+US_Accidents$Severity <- fct_collapse(US_Accidents$Severity, Low = c("1","2"), High = c("3","4"))
+
+
+#Convert side to factor and remove empty
+US_Accidents$Side <- factor(US_Accidents$Side)
+levels(US_Accidents$Side)[1] <- NA
+levels(US_Accidents$Side) <- c("Left", "Right")
+
+US_Accidents$Amenity <- factor(US_Accidents$Amenity)
+US_Accidents$Bump <- factor(US_Accidents$Bump)
+US_Accidents$Crossing <- factor(US_Accidents$Crossing)
+US_Accidents$Give_Way <- factor(US_Accidents$Give_Way)
+US_Accidents$Junction <- factor(US_Accidents$Junction)
+US_Accidents$No_Exit <- factor(US_Accidents$No_Exit)
+US_Accidents$Railway <- factor(US_Accidents$Railway)
+US_Accidents$Roundabout <- factor(US_Accidents$Roundabout)
+US_Accidents$Station <- factor(US_Accidents$Station)
+US_Accidents$Stop <- factor(US_Accidents$Stop)
+US_Accidents$Traffic_Calming <- factor(US_Accidents$Traffic_Calming)
+US_Accidents$Traffic_Signal <- factor(US_Accidents$Traffic_Signal)
+US_Accidents$State <- factor(US_Accidents$State)
+US_Accidents$Time.Interval <- factor(US_Accidents$Time.Interval)
+
+US_Accidents$Timezone <- factor(US_Accidents$Timezone)
+levels(US_Accidents$Timezone)[1] <- NA
+
+# Convert ZipCode to 10 level factor
+US_Accidents <- US_Accidents[!is.na(US_Accidents$Zipcode), ] # Remove rows without zipcode
+US_Accidents$ZipcodeLevels[nchar(US_Accidents$Zipcode)==4] <-  0 # Convert all 4 digits zipcode to level 0
+US_Accidents$ZipcodeLevels <- substr(US_Accidents$Zipcode, 1, 1) 
+US_Accidents$ZipcodeLevels <- factor(US_Accidents$ZipcodeLevels) 
+
+levels(US_Accidents$ZipcodeLevels)[1] <- NA # Convert empty zipcodelevel to NA
+US_Accidents <- US_Accidents[!is.na(US_Accidents$ZipcodeLevels), ] # Remove rows with empty zipcodelevels
+
+# Trim the characters after 5 digits -> if not will cause NA issues
+US_Accidents$Zipcode <- substr(US_Accidents$Zipcode, 1, 5) 
+US_Accidents$Zipcode <- as.numeric(US_Accidents$Zipcode) 
+
+
+#Time difference between start and end time
+US_Accidents$Start_Time <- mdy_hm(US_Accidents$Start_Time)
+US_Accidents$End_Time <-  mdy_hm(US_Accidents$End_Time)
+US_Accidents$timediff.min <- as.numeric(with(US_Accidents, difftime(End_Time,Start_Time,units="mins")))
+
+sapply(US_Accidents, function(x) sum(is.na(x)))
+
+US_Accidents = US_Accidents[-c(10,11)]
+US_Accidents <- na.omit(US_Accidents)
+
+str(US_Accidents)
+names(US_Accidents)
+```
+
+```{r}
+# Random Forest to find Best features for severity 
+#rf <- randomForest(Severity ~ ., data = US_Accidents)
+#varImpPlot(rf)
+```
+
+
+```{r}
+summary(US_Accidents)
+```
+
+```{r}
+str(US_Accidents)
+```
+
+```{r}
+sapply(US_Accidents, function(x) sum(is.na(x))) # no Na's
+```
+
+# Plotting severity-cateforical data on map of usa. Pattern of interstate highways emerges. 
+```{r}
+ggplot(US_Accidents, aes(x= Start_Lng, y = Start_Lat, color= Severity)) + geom_point(alpha = I(3/4)) 
+```
+
+From plotting the longitudinal and latitudinal points, we created a map which shows a clear distinction of where accidents of both severity levels occur based on geographic location. From this plot, we can see that low severity accidents are more probable, and are found within states (locally). On the other hand, high severity accidents occur more in the highways and interstates (eg. I-95 NY->FL).
+
+```{r}
+# checking correlations
+mytable <- xtabs(~Severity + Side , data= US_Accidents)
+ftable(mytable) # print table   if side is left data is more likely to be low severity i.e p = 0.93 .   
+7583/(7583 + 513) # Severity data has more obs in 'low' category , also seen in ggpairs 
+```
+
+```{r}
+mytable <- xtabs(~Severity + State, data= US_Accidents)
+
+ftable(mytable) 
+# we find high accidents in states : Texas = 2199, Florida= 1733, California= 1426
+```
+
+writing out FINAL CLEAN DATA
+```{r}
+write.table(US_Accidents, 
+            file = "group6_cleandata.csv", 
+            sep = "\t",
+            row.names = FALSE)  
+```
+
+

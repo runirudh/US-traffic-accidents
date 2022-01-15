@@ -8,21 +8,37 @@ Data has 50+ usable features - >
 
                                 Original data has 4 severity levels, with most of the data in levels 2 & 3. 
 
-                                For prediction, we have bundled levels 1 & 2 into Low category , and 3 & 4 
+                                For prediction, we have bundled levels 1 & 2 into Low category, and 3 & 4 
                                 
                                 into High category, as this skewing would affect the model's learning otherwise.
                                 
                                 
 
-
 <img width="614" alt="Screen Shot 2022-01-15 at 9 58 33 AM" src="https://user-images.githubusercontent.com/96305841/149627920-44d26d81-62f8-4465-aa09-2acbc56d579f.png">
 <img width="615" alt="Screen Shot 2022-01-15 at 9 58 39 AM" src="https://user-images.githubusercontent.com/96305841/149627934-3c2e62ee-c243-4523-8fb9-8cb39a40836d.png">
 
+### Feature names:
+<img width="601" alt="Screen Shot 2022-01-15 at 11 05 46 AM" src="https://user-images.githubusercontent.com/96305841/149628936-2613882d-381a-4182-bc42-16db64ac1474.png">
+
+
 ### Data Summary:
+
+Summary shows the 2 new variables which we created at the end of the table to get more out of our features. 
+
+                              1. ZipcodeLevels - Bins zipcode values to 10 bins 
+
+                              2. time diff min - Time it took for accident to be marked clear. 
+                              
+                                                 created through time stamps of start and end time.  
+
+
 <img width="942" alt="Screen Shot 2022-01-15 at 10 03 49 AM" src="https://user-images.githubusercontent.com/96305841/149627951-964cf550-ffbb-467d-ae21-d8b57c70bea0.png">
 
 ## Accident Data visualization for 2 severity levels:
 <img width="565" alt="Screen Shot 2022-01-15 at 9 57 39 AM" src="https://user-images.githubusercontent.com/96305841/149628020-5e4b51a3-b5dc-4969-8200-625ed0ef6bd7.png">
+
+## Data types of features:
+
 
 
 ## GGPairs for correlation between variables:
@@ -46,9 +62,17 @@ Data has 50+ usable features - >
 
 ### AUC TEST showing predictive ability:
 
+AUC Test is done for categorical predictions, which simply tests True positives vs False positive, i.e Sensitivity vs Precision 
+
+by finding an f score. 
+
 <img width="307" alt="Screen Shot 2022-01-15 at 10 00 02 AM" src="https://user-images.githubusercontent.com/96305841/149628124-aee85046-9058-4706-8ab0-6bd003674c5b.png">
 
-**We see model does not have great predictive ability. A good model has value closer to 1. Null model would have accuracy 0.5** 
+                                We see model does not have great predictive ability. 
+                                
+                                A good model has value closer to 1. Null model would have accuracy 0.5
+                                
+                                Our model Area under curve value is 0.58 
 
 ### residuals 
 <img width="462" alt="Screen Shot 2022-01-15 at 10 00 18 AM" src="https://user-images.githubusercontent.com/96305841/149628362-ce0edc9b-c9c2-4368-97af-f9c2e1cf7817.png">

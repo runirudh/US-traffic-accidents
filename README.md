@@ -93,31 +93,53 @@ We get the same results splitting data into test-train manually (71.5%)
           
 - Removing these outliers and comparing old model
 
-<img width="1085" alt="image" src="https://user-images.githubusercontent.com/96305841/149629680-eff5d1c2-a318-42ca-93f0-f95bdf56b0a1.png">
-<img width="480" alt="Screen Shot 2022-01-15 at 11 33 28 AM" src="https://user-images.githubusercontent.com/96305841/149629728-a3dfa8fb-1681-4f72-81da-85b29df89f3b.png">
+<img width="648" alt="Screen Shot 2022-01-15 at 11 36 06 AM" src="https://user-images.githubusercontent.com/96305841/149629887-a3e1c5ef-52a7-4ff6-815a-c78923147182.png">
 
 
-### residuals after removing outliers: (does not affect model deviance, so good)
+### residuals after removing outliers: (does not affect model coefs or deviance, so it's allowed)
 
 <img width="484" alt="Screen Shot 2022-01-15 at 10 00 35 AM" src="https://user-images.githubusercontent.com/96305841/149628376-191faab6-043b-47ec-ac1f-94895e3fe2c4.png">
 
 ### influence plot: 
 
+- As observed before in outliers, points with high leverage don’t show much influence. 
+- Here, we see some  fitted values have big cooks distance (size) and high residual value still. 
+- Adding weights using cooksd < 4/n sample  &  res <3  worsens our model values and plots. 
+
 <img width="548" alt="Screen Shot 2022-01-15 at 10 00 44 AM" src="https://user-images.githubusercontent.com/96305841/149628411-a31f936a-cc5f-469a-b197-1d24dd9e6e44.png">
 
-## Final conclusions :  
-
-                       1.
-                       
-                       2.
-                       
-                       3.
-                       
-                       4.
-                       
-                       5.
-                       
-                       
 
 
+# Final conclusions from model summary :  
+
+- Log odds of accident severity going from low to high, keeping all other independent variables constant,
+  can be read from the coefficients of each predictor variable. 
+  
+- For categorical data this is in % change levels change from base level.
+
+- Model does not have a high utility. McFadden R^2 is very low.
+
+
+  1. Accident severity levels are high on interstate highways 
+
+<img width="687" alt="Screen Shot 2022-01-15 at 11 48 50 AM" src="https://user-images.githubusercontent.com/96305841/149630244-ed68ac86-14a3-468b-bdb3-382761251832.png">
+                   
+  2. Most values are significant(p values) . Insignificant in Timezone level coefs could be explained by the skewing in timezone distribution.
+
+  <img width="942" alt="Screen Shot 2022-01-15 at 10 03 49 AM" src="https://user-images.githubusercontent.com/96305841/149630616-981b252a-4d4e-40ff-b62a-268c695cb2c2.png">
+
+  <img width="710" alt="Screen Shot 2022-01-15 at 11 56 34 AM" src="https://user-images.githubusercontent.com/96305841/149630584-36d665c8-7cf5-4027-9678-717012748dfb.png">
+  
+  3. zipcodelevels * side - 
+  High severity cases are more likely in zipcodelevels 2, 4, 5, 6 when Driving Side is Right (wrong) side of road. 
+  These zipcode levels are found in regions near Maryland(east), Kentucky (S.E) , Iowa (mid-W), Nebraska(mid-W) 
+                       
+  4. 1 min increase in time spent (accident) increases severity p by 0.002
+  
+  5. Time interval -  4 , 5, 6, i.e  10am - 10 pm  have a higher chance of accidents being severe as time interval changes from level ‘0’  i.e (10pm-12am)
+     This would mean that severe accidents occur more in the daytime than between the hours 10 pm to midnight. 
+  
+  6. As Timezone changes from US/Central to US/Eastern chances of severity being high increase by a 100% 
+
+  7. Visibility beta is 0.97 i.e, as Visibility increases odds of severity (high) decrease
 

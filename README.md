@@ -66,7 +66,9 @@ after running **stepwise and partial f tests on model with all the data, we arri
 
 <img width="581" alt="Screen Shot 2022-01-15 at 9 59 48 AM" src="https://user-images.githubusercontent.com/96305841/149628079-4f42f5fb-62e4-4579-8763-81836f088569.png">
 
-### Model accuracy:
+### Model accuracy via Cross validation:
+We get the same results splitting data into test-train manually (71.5%)
+
 <img width="511" alt="Screen Shot 2022-01-15 at 10 51 52 AM" src="https://user-images.githubusercontent.com/96305841/149628159-9041b668-313e-4e18-8115-fcc289f1321e.png">
 
 ### AUC TEST showing predictive ability:
@@ -84,6 +86,16 @@ after running **stepwise and partial f tests on model with all the data, we arri
 ### residuals 
 
 <img width="462" alt="Screen Shot 2022-01-15 at 10 00 18 AM" src="https://user-images.githubusercontent.com/96305841/149628362-ce0edc9b-c9c2-4368-97af-f9c2e1cf7817.png">
+
+       Looking at observations which produced outliers we see : 
+       
+       time.diffmin and visibility metrics for these data are > p = 0.95 , i.e extreme values.
+          
+- Removing these outliers and comparing old model
+
+<img width="1085" alt="image" src="https://user-images.githubusercontent.com/96305841/149629680-eff5d1c2-a318-42ca-93f0-f95bdf56b0a1.png">
+<img width="480" alt="Screen Shot 2022-01-15 at 11 33 28 AM" src="https://user-images.githubusercontent.com/96305841/149629728-a3dfa8fb-1681-4f72-81da-85b29df89f3b.png">
+
 
 ### residuals after removing outliers: (does not affect model deviance, so good)
 

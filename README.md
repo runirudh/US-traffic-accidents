@@ -31,8 +31,8 @@ At the end of the table we see 2 variables which were created to get more out of
                               
                         Created through time stamps of start and end time.  
 
+<img width="506" alt="Screen Shot 2022-01-15 at 11 22 09 AM" src="https://user-images.githubusercontent.com/96305841/149629335-cd331eb2-24ea-4017-839c-cc5059f04bd3.png">
 
-<img width="942" alt="Screen Shot 2022-01-15 at 10 03 49 AM" src="https://user-images.githubusercontent.com/96305841/149627951-964cf550-ffbb-467d-ae21-d8b57c70bea0.png">
 
 ## Accident Data visualization for 2 severity levels:
 <img width="565" alt="Screen Shot 2022-01-15 at 9 57 39 AM" src="https://user-images.githubusercontent.com/96305841/149628020-5e4b51a3-b5dc-4969-8200-625ed0ef6bd7.png">
@@ -57,7 +57,9 @@ we find that wind chill and temparature are correlated and shouldn't be used in 
 <img width="540" alt="Screen Shot 2022-01-15 at 9 57 58 AM" src="https://user-images.githubusercontent.com/96305841/149627963-a3e1eba0-99e4-459d-90e6-c39ed4c295be.png">
 
 ## Final GLM model:
+
 after running **stepwise and partial f tests on model with all the data, we arrive at this Smaller, Simpler model** summarized below:
+
 <img width="532" alt="Screen Shot 2022-01-15 at 9 59 34 AM" src="https://user-images.githubusercontent.com/96305841/149628054-09c0568d-fcee-4cdb-a9cb-08ee9c1caa20.png">
 
 ### Anova table for model:
@@ -69,9 +71,7 @@ after running **stepwise and partial f tests on model with all the data, we arri
 
 ### AUC TEST showing predictive ability:
 
-       AUC Test is done for categorical predictions, which simply tests True positives vs False positive,
-       
-       i.e Sensitivity vs Precision by finding an f score. 
+       AUC Test is done for categorical predictions, which tests True positives vs False positive.
 
 <img width="307" alt="Screen Shot 2022-01-15 at 10 00 02 AM" src="https://user-images.githubusercontent.com/96305841/149628124-aee85046-9058-4706-8ab0-6bd003674c5b.png">
 

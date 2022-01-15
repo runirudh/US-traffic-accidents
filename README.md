@@ -134,7 +134,7 @@ We get the same results splitting data into test-train manually (71.5%)
   **High severity cases** are more likely in zipcodelevels 2, 4, 5, 6 when **Driver drives on the Right (wrong) side of road**. 
   These zipcode levels are found in regions near Maryland(east), Kentucky (S.E) , Iowa (mid-W), Nebraska(mid-W) 
                        
-**4. 1 min increase in time spent (accident) increases severity p by 0.002 **
+**4. 1 min increase in time spent (accident) increases severity p by 0.002**
   
 **5.** Time interval -  4 , 5, 6, i.e  10am - 10 pm  have a higher chance of accidents being severe as time interval changes from level ‘0’  i.e (10pm-12am)
      **This would mean that severe accidents occur more in the daytime than between the hours 10 pm to midnight.** 

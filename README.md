@@ -119,11 +119,11 @@ We get the same results splitting data into test-train manually (71.5%)
 
 - Model does not have a high utility. McFadden R^2 is very low.
 
-**1. Accident severity levels are high on interstate highways 
+**1. Accident severity levels are high on interstate highways** 
 
 <img width="687" alt="Screen Shot 2022-01-15 at 11 48 50 AM" src="https://user-images.githubusercontent.com/96305841/149630244-ed68ac86-14a3-468b-bdb3-382761251832.png">
                    
-**2. Most values are significant(p values) . Insignificant in Timezone level coefs could be explained by the skewing in timezone distribution.
+**2**. Most values are significant(p values) . Insignificant in Timezone level coefs could be explained by the skewing in timezone distribution.
 
   <img width="942" alt="Screen Shot 2022-01-15 at 10 03 49 AM" src="https://user-images.githubusercontent.com/96305841/149630616-981b252a-4d4e-40ff-b62a-268c695cb2c2.png">
 
@@ -137,9 +137,9 @@ We get the same results splitting data into test-train manually (71.5%)
 **4. 1 min increase in time spent (accident) increases severity p by 0.002 **
   
 **5.** Time interval -  4 , 5, 6, i.e  10am - 10 pm  have a higher chance of accidents being severe as time interval changes from level ‘0’  i.e (10pm-12am)
-     **This would mean that severe accidents occur more in the daytime than between the hours 10 pm to midnight. 
+     **This would mean that severe accidents occur more in the daytime than between the hours 10 pm to midnight.** 
   
 **6. As Timezone changes from US/Central to US/Eastern** chances of severity being high increase by a 100% 
 
-**7. Visibility beta is 0.97 i.e, as Visibility increases odds of severity (high) decrease
+**7. Visibility beta is 0.97 i.e, as Visibility increases odds of severity (high) decrease**
 

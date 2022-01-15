@@ -48,7 +48,9 @@ At the end of the table we see 2 variables which were created to get more out of
 
 
 ## GGPairs for correlation between variables:
-we find that wind chill and temparature are correlated and shouldn't be used in a model together.
+we find that wind chill and temparature are correlated and shouldn't be used in a model
+together.
+
 <img width="562" alt="Screen Shot 2022-01-15 at 9 58 15 AM" src="https://user-images.githubusercontent.com/96305841/149627982-c2cf2d0d-879a-4798-b336-907dfb8ea960.png">
 
 

@@ -104,9 +104,10 @@ We get the same results splitting data into test-train manually (71.5%)
 
 ### influence plot: 
 
-- Points with high leverage (x-axis) don’t show much influence (size). 
+- Points with high leverage (along x-axis) show more influence (size) than points with low leverage. 
 - We see some fitted values have a large value for sqrt of cook's distance (size) and high residuals. 
 - Adding weights to parameters using cooksd < 4/n * sample  &  residuals <3  worsens our model performance and plots. 
+- Not all leverage points are influential, only those that have high residuals.
 
 <img width="548" alt="Screen Shot 2022-01-15 at 10 00 44 AM" src="https://user-images.githubusercontent.com/96305841/149628411-a31f936a-cc5f-469a-b197-1d24dd9e6e44.png">
 

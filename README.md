@@ -104,9 +104,9 @@ We get the same results splitting data into test-train manually (71.5%)
 
 ### influence plot: 
 
-- As observed before in outliers, points with high leverage don’t show much influence. 
-- Here, we see some  fitted values have big cooks distance (size) and high residual value still. 
-- Adding weights using cooksd < 4/n sample  &  res <3  worsens our model values and plots. 
+- Points with high leverage (x-axis) don’t show much influence (size). 
+- We see some fitted values have a large value for sqrt of cook's distance (size) and high residuals. 
+- Adding weights to parameters using cooksd < 4/n * sample  &  residuals <3  worsens our model performance and plots. 
 
 <img width="548" alt="Screen Shot 2022-01-15 at 10 00 44 AM" src="https://user-images.githubusercontent.com/96305841/149628411-a31f936a-cc5f-469a-b197-1d24dd9e6e44.png">
 

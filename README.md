@@ -120,7 +120,7 @@ We get the same results splitting data into test-train manually (71.5%)
   
 - For categorical data this is in % change as levels change from base level.
 
-- Model does not have a high utility. McFadden R^2 is very low.
+- Model does not have a high utility. McFadden R^2 is very low, but the following trends were observed.
 
 **1. Accident severity levels are high on interstate highways** 
 

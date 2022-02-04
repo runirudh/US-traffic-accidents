@@ -118,7 +118,7 @@ We get the same results splitting data into test-train manually (71.5%)
 - Log odds of accident severity going from low to high, keeping all other independent variables constant,
   can be read from the coefficients of each predictor variable. 
   
-- For categorical data this is in % change levels change from base level.
+- For categorical data this is in % change as levels change from base level.
 
 - Model does not have a high utility. McFadden R^2 is very low.
 
